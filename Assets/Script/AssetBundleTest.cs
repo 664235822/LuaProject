@@ -7,9 +7,25 @@ public class AssetBundleTest : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        AssetBundle assetBundle = AssetBundle.LoadFromFile(Application.streamingAssetsPath + "/model");
-        GameObject obj = assetBundle.LoadAsset<GameObject>("Cube");
-        Instantiate(obj);
+        StartCoroutine(LoadAssetBundleList());
+    }
+
+    IEnumerator LoadAssetBundleList()
+    {
+        yield return LoadAssetBundleObject("model", "Cube");
+        yield return LoadAssetBundleObject("model", "Sphere");
+    }
+
+    IEnumerator LoadAssetBundleObject(string file, string asset)
+    {
+        AssetBundleCreateRequest assetBundleCreateRequest =
+            AssetBundle.LoadFromFileAsync(Application.streamingAssetsPath + "/" + file);
+        yield return assetBundleCreateRequest;
+        AssetBundleRequest assetBundleRequest = assetBundleCreateRequest.assetBundle.LoadAssetAsync<GameObject>(asset);
+        yield return assetBundleRequest;
+        Instantiate(assetBundleRequest.asset);
+        AssetBundleUnloadOperation assetBundleUnloadOperation = assetBundleCreateRequest.assetBundle.UnloadAsync(false);
+        yield return assetBundleUnloadOperation;
     }
 
     // Update is called once per frame
